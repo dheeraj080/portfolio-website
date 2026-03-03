@@ -144,21 +144,27 @@ const Mapbox = forwardRef<MapRef, MapboxProps>(
     };
 
     // Add Geocoder control
+    // ... around line 157
+    // Add Geocoder control
     useEffect(() => {
       if (!showGeocoder || !mapRef.current) return;
 
       const map = mapRef.current;
       const geocoderOptions: GeocoderOptions = {
         accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!,
-        mapboxgl: mapboxgl,
+        mapboxgl: mapboxgl as unknown, // REMOVED ANY: Use unknown instead
       };
+      
       const geocoder = new MapboxGeocoder(geocoderOptions);
 
-      map.getMap().addControl(geocoder);
+      // REMOVED ANY: Cast to unknown, then to IControl
+      const control = geocoder as unknown as mapboxgl.IControl;
+
+      map.getMap().addControl(control);
 
       return () => {
         if (map) {
-          map.getMap().removeControl(geocoder);
+          map.getMap().removeControl(control);
         }
       };
     }, [showGeocoder]);

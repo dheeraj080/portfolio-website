@@ -20,11 +20,15 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    /* --- THE FIX: Restrict type discovery --- */
+    "types": ["node", "react", "react-dom"],
+    "typeRoots": ["node_modules/@types"]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    "global.d.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",

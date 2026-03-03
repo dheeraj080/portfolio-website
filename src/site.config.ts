@@ -74,13 +74,11 @@ export const siteConfig = {
   },
 
   /**
-   * Mapbox custom style URLs (optional).
-   * If not set, Mapbox default styles will be used.
-   * Create your own at https://studio.mapbox.com/
+   * Free Maplibre Custom style URLs.
    */
   mapbox: {
-    lightStyle: "mapbox://styles/ecarry/cldmhu6tr000001n33ujbxf7j",
-    darkStyle: "mapbox://styles/ecarry/clp8hcmd300km01qx78rt0xaw",
+    lightStyle: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+    darkStyle: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
   },
 
   /**

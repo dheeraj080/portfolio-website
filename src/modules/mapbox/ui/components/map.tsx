@@ -1,7 +1,7 @@
 "use client";
 
 // External dependencies
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import { useCallback, useEffect, useRef, forwardRef } from "react";
 import Map, {
   GeolocateControl,
@@ -11,16 +11,12 @@ import Map, {
   Marker,
   NavigationControl,
   Source,
-} from "react-map-gl/mapbox";
-// Hooks & Types
-import MapboxGeocoder, {
-  type GeocoderOptions,
-} from "@mapbox/mapbox-gl-geocoder";
+} from "react-map-gl/maplibre";
+
 import { useTheme } from "next-themes";
 import { siteConfig } from "@/site.config";
 // Styles
-import "mapbox-gl/dist/mapbox-gl.css";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 export interface MapboxProps {
   id?: string;
@@ -143,37 +139,16 @@ const Mapbox = forwardRef<MapRef, MapboxProps>(
       },
     };
 
-    // Add Geocoder control
-    // ... around line 157
-    // Add Geocoder control
+    // Removed Geocoder Control, Nominatim can be used instead or just standard Map controls
     useEffect(() => {
-      if (!showGeocoder || !mapRef.current) return;
-
-      const map = mapRef.current;
-      const geocoderOptions: GeocoderOptions = {
-        accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!,
-        mapboxgl: mapboxgl as unknown, // REMOVED ANY: Use unknown instead
-      };
-      
-      const geocoder = new MapboxGeocoder(geocoderOptions);
-
-      // REMOVED ANY: Cast to unknown, then to IControl
-      const control = geocoder as unknown as mapboxgl.IControl;
-
-      map.getMap().addControl(control);
-
-      return () => {
-        if (map) {
-          map.getMap().removeControl(control);
-        }
-      };
+      // no-op, mapbox-geocoder removed to avoid proprietary dependencies
     }, [showGeocoder]);
 
     // Handle GeoJSON click
     const onClick = useCallback(
       (
-        event: mapboxgl.MapMouseEvent & {
-          features?: mapboxgl.GeoJSONFeature[];
+        event: maplibregl.MapMouseEvent & {
+          features?: maplibregl.GeoJSONFeature[];
         },
       ) => {
         const feature = event.features?.[0];
@@ -207,7 +182,7 @@ const Mapbox = forwardRef<MapRef, MapboxProps>(
         boxZoom={boxZoom}
         dragRotate={dragRotate}
         dragPan={dragPan}
-        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+
         initialViewState={initialViewState}
         style={{ width: "100%", height: "100%" }}
         mapStyle={MAP_STYLES[theme === "dark" ? "dark" : "light"]}

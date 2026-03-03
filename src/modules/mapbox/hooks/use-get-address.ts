@@ -56,15 +56,58 @@ export const useGetAddress = ({ lat, lng }: UseGetLocationProps) => {
 
       try {
         const response = await fetch(
-          `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${lng}&latitude=${lat}&language=en&access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+          {
+            headers: {
+              "User-Agent": "ECarryPhotography/1.0",
+            },
+          }
         );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data: MapboxReverseGeocodingResponse = await response.json();
-        setState({ data, isLoading: false, error: null });
+        const data = await response.json();
+
+        // Check if there is an error from Nominatim (e.g. invalid coords) 
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const address = data.address || {};
+        
+        // Map Nominatim to Mapbox response structure
+        const mappedData: MapboxReverseGeocodingResponse = {
+          type: "FeatureCollection",
+          query: [lng, lat],
+          features: [
+            {
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [Number(data.lon) || lng, Number(data.lat) || lat],
+              },
+              properties: {
+                full_address: data.display_name || "",
+                name: data.name || address.city || address.town || address.village || "",
+                place_formatted: data.display_name || "",
+                context: {
+                  country: {
+                    country_code: (address.country_code || "us").toUpperCase(),
+                    name: address.country || "",
+                  },
+                  locality: address.suburb ? { name: address.suburb } : null,
+                  place: address.city || address.town || address.village ? 
+                         { name: address.city || address.town || address.village } : null,
+                  region: address.state ? { name: address.state } : null,
+                },
+              },
+            }
+          ]
+        };
+        
+        setState({ data: mappedData, isLoading: false, error: null });
       } catch (error) {
         setState({
           data: null,

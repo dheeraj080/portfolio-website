@@ -1,33 +1,28 @@
+// next.config.ts
 import type { NextConfig } from "next";
-import { siteConfig } from "./src/site.config";
 
 const s3PublicUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || "";
 const s3Url = s3PublicUrl ? new URL(s3PublicUrl) : null;
 const s3Hostname = s3Url ? s3Url.hostname : "";
-const s3Protocol = s3Url ? s3Url.protocol.replace(":", "") : "https";
+const s3Protocol = s3Url ? (s3Url.protocol.replace(":", "") as "http" | "https") : "https";
 
-const useCloudflareLoader = siteConfig.imageLoader === "cloudflare";
+console.log('--- NEXT CONFIG DIAGNOSTICS ---');
+console.log('s3PublicUrl:', s3PublicUrl);
+console.log('s3Hostname:', s3Hostname);
+console.log('-------------------------------');
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  /* config options here */
-  reactCompiler: true,
   images: {
-    qualities: [65, 75],
-    ...(useCloudflareLoader && {
-      loader: "custom",
-      loaderFile: "./src/lib/cloudflare-image-loader.ts",
-    }),
-    remotePatterns: s3Hostname
-      ? [
-          {
-            protocol: s3Protocol as "http" | "https",
-            hostname: s3Hostname,
-            port: s3Url?.port || "",
-          },
-        ]
-      : [],
+    unoptimized: true, // Fixes the "Private IP" error
+    remotePatterns: s3Hostname ? [
+      {
+        protocol: s3Protocol,
+        hostname: s3Hostname,
+        pathname: '/**',
+      },
+    ] : [],
   },
+  // If you have other config options (like experimental turbo), add them here
 };
 
 export default nextConfig;
